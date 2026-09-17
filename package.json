@@ -1,0 +1,13 @@
+{
+  "name": "expiry-food-marketplace",
+  "version": "1.0.0",
+  "description": "Full-stack marketplace web application for rescuing near-expiry food at discounted prices",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "seed": "node backend/src/database/seed.js",
+    "test": "node backend/test/api.test.js",
+    "build": "cd frontend && npm run build",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev"
+  }
+}
