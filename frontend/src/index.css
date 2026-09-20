@@ -22,3 +22,46 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
+
+/* Custom Leaflet Styling */
+.leaflet-container {
+  font-family: inherit;
+  z-index: 10 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  overflow: hidden;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: inherit;
+}
+
+.leaflet-popup-tip {
+  background: white;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+@keyframes map-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.animate-map-pulse {
+  animation: map-pulse 2s infinite;
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import UrgencyBadge from './UrgencyBadge';
+import StoreMiniMap from './StoreMiniMap';
 import {
   X,
   MapPin,
@@ -13,6 +14,7 @@ import {
   ShoppingBag,
   Zap
 } from 'lucide-react';
+
 
 export default function ProductDetailModal({ product, onClose, onBuyNow }) {
   const { addItem } = useCart();
@@ -167,7 +169,21 @@ export default function ProductDetailModal({ product, onClose, onBuyNow }) {
                   </span>
                 )}
               </div>
+
+              {/* Real Interactive Pickup Mini-Map */}
+              {product.provider_lat && product.provider_lng && (
+                <div className="pt-2">
+                  <StoreMiniMap
+                    lat={product.provider_lat}
+                    lng={product.provider_lng}
+                    storeName={product.provider_name}
+                    address={product.provider_address}
+                    height="160px"
+                  />
+                </div>
+              )}
             </div>
+
 
             {/* Quantity Selector */}
             <div className="flex items-center justify-between pt-2">

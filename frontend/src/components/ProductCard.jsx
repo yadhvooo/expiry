@@ -51,12 +51,25 @@ export default function ProductCard({ product, onViewDetails }) {
 
         {/* Distance Overlay */}
         {product.distance_km != null && (
-          <div className="absolute bottom-2 left-2.5 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-emerald-400" />
-            <span>{product.distance_km} km away</span>
+          <div
+            className={`absolute bottom-2 left-2.5 backdrop-blur-md text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm ${
+              product.distance_km > 5
+                ? 'bg-amber-950/85 text-amber-200 border border-amber-500/50'
+                : 'bg-black/60 text-white'
+            }`}
+          >
+            <MapPin
+              className={`w-3 h-3 ${
+                product.distance_km > 5 ? 'text-amber-400' : 'text-emerald-400'
+              }`}
+            />
+            <span>
+              {product.distance_km} km {product.distance_km > 5 ? '• Long Pickup' : 'away'}
+            </span>
           </div>
         )}
       </div>
+
 
       {/* Card Content */}
       <div className="p-4 flex-1 flex flex-col justify-between">

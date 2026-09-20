@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import QRCodeModal from '../components/QRCodeModal';
+import StoreMiniMap from '../components/StoreMiniMap';
 import {
   ClipboardList,
   Store,
@@ -9,7 +10,10 @@ import {
   ShieldCheck,
   RefreshCw,
   Package,
-  AlertCircle
+  AlertCircle,
+  MapPin,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 export default function CustomerOrdersPage() {
@@ -17,10 +21,12 @@ export default function CustomerOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedQrOrder, setSelectedQrOrder] = useState(null);
+  const [openMapOrderId, setOpenMapOrderId] = useState(null);
 
   useEffect(() => {
     loadOrders();
   }, []);
+
 
   async function loadOrders() {
     try {
@@ -165,15 +171,55 @@ export default function CustomerOrdersPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setSelectedQrOrder(order)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs shadow-sm transition-all"
-                >
-                  <QrCode className="w-4 h-4 text-emerald-400" />
-                  <span>Show QR Code</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {order.provider_lat && order.provider_lng && (
+                    <button
+                      onClick={() =>
+                        setOpenMapOrderId(openMapOrderId === order.id ? null : order.id)
+                      }
+                      className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-700 font-bold text-xs border border-stone-200 shadow-sm transition-all"
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>{openMapOrderId === order.id ? 'Hide Map' : 'Store Map'}</span>
+                      {openMapOrderId === order.id ? (
+                        <ChevronUp className="w-3.5 h-3.5 text-stone-400" />
+                      ) : (
+                        <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
+                      )}
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => setSelectedQrOrder(order)}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs shadow-sm transition-all"
+                  >
+                    <QrCode className="w-4 h-4 text-emerald-400" />
+                    <span>Show QR Code</span>
+                  </button>
+                </div>
               </div>
+
+              {/* Collapsible Store Pickup Real Map */}
+              {openMapOrderId === order.id && order.provider_lat && order.provider_lng && (
+                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2 animate-in fade-in duration-150">
+                  <div className="flex flex-wrap items-center justify-between text-xs gap-1 pb-1">
+                    <span className="font-bold text-stone-800 flex items-center gap-1.5">
+                      <Store className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>{order.provider_name} • Counter Collection Point</span>
+                    </span>
+                    <span className="text-stone-500 text-[11px]">{order.provider_address}</span>
+                  </div>
+                  <StoreMiniMap
+                    lat={order.provider_lat}
+                    lng={order.provider_lng}
+                    storeName={order.provider_name}
+                    address={order.provider_address}
+                    height="180px"
+                  />
+                </div>
+              )}
             </div>
+
           ))}
         </div>
       )}
