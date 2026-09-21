@@ -7,7 +7,7 @@
     "seed": "node backend/src/database/seed.js",
     "test": "node backend/test/api.test.js",
     "install:all": "cd backend && npm install && cd ../customer-app && npm install && cd ../store-app && npm install && cd ../admin-app && npm install && cd ..",
-    "render-build": "cd backend && npm install && cd ../customer-app && npm install && npm run build && cd ../store-app && npm install && npm run build && cd ../admin-app && npm install && npm run build && cd ..",
+    "render-build": "cd backend && npm install && cd ../customer-app && npm install --include=dev && npm run build && cd ../store-app && npm install --include=dev && npm run build && cd ../admin-app && npm install --include=dev && npm run build && cd ..",
     "build": "npm run render-build",
     "dev:backend": "cd backend && npm run dev",
     "dev:customer": "cd customer-app && npm run dev",
