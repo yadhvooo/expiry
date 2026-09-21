@@ -7,9 +7,11 @@
     "seed": "node backend/src/database/seed.js",
     "test": "node backend/test/api.test.js",
     "build": "cd frontend && npm install && npm run build",
-    "render-build": "cd backend && npm install && cd ../frontend && npm install && npm run build && cd ..",
+    "render-build": "cd backend && npm install && cd ../frontend && npm install --include=dev && npm run build && cd ..",
     "dev:backend": "cd backend && npm run dev",
+
     "dev:frontend": "cd frontend && npm run dev"
   }
 }
+
 
