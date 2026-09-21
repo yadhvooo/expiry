@@ -99,7 +99,21 @@ app.use((err, req, res, next) => {
 async function startServer() {
   try {
     await initDatabase();
+
+    // Auto-seed if database is fresh and empty (e.g. on Render first deploy)
+    try {
+      const productCount = await db.query('SELECT COUNT(*) as count FROM products');
+      if (parseInt(productCount[0]?.count || 0) === 0) {
+        console.log('[Server] Fresh database detected. Auto-seeding initial marketplace data...');
+        const { seedDatabase } = await import('./database/seed.js');
+        await seedDatabase();
+      }
+    } catch (e) {
+      console.warn('[Server] Auto-seed check skipped:', e.message);
+    }
+
     app.listen(PORT, () => {
+
       console.log(`=======================================================`);
       console.log(`  RescueBites Marketplace Server is Running!           `);
       console.log(`  URL: http://localhost:${PORT}                        `);
