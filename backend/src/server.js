@@ -77,15 +77,50 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 
 // Serve Frontend Static Assets if built
-const frontendDist = path.resolve(__dirname, '../../frontend/dist');
-if (fs.existsSync(frontendDist)) {
-  console.log(`[Static] Serving frontend from: ${frontendDist}`);
-  app.use(express.static(frontendDist));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(frontendDist, 'index.html'));
-  });
+const customerDist = path.resolve(__dirname, '../../customer-app/dist');
+const storeDist = path.resolve(__dirname, '../../store-app/dist');
+const adminDist = path.resolve(__dirname, '../../admin-app/dist');
+const legacyFrontendDist = path.resolve(__dirname, '../../frontend/dist');
+
+// Mount Store App at /store
+if (fs.existsSync(storeDist)) {
+  console.log(`[Static] Serving Store App from: ${storeDist} at /store`);
+  app.use('/store', express.static(storeDist));
 }
+
+// Mount Admin App at /admin
+if (fs.existsSync(adminDist)) {
+  console.log(`[Static] Serving Admin App from: ${adminDist} at /admin`);
+  app.use('/admin', express.static(adminDist));
+}
+
+// Mount Customer App at /
+if (fs.existsSync(customerDist)) {
+  console.log(`[Static] Serving Customer App from: ${customerDist} at /`);
+  app.use(express.static(customerDist));
+} else if (fs.existsSync(legacyFrontendDist)) {
+  console.log(`[Static] Serving Legacy Frontend from: ${legacyFrontendDist}`);
+  app.use(express.static(legacyFrontendDist));
+}
+
+// SPA Fallback Routing
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+
+  if (req.path.startsWith('/store') && fs.existsSync(storeDist)) {
+    return res.sendFile(path.join(storeDist, 'index.html'));
+  }
+  if (req.path.startsWith('/admin') && fs.existsSync(adminDist)) {
+    return res.sendFile(path.join(adminDist, 'index.html'));
+  }
+  if (fs.existsSync(customerDist)) {
+    return res.sendFile(path.join(customerDist, 'index.html'));
+  }
+  if (fs.existsSync(legacyFrontendDist)) {
+    return res.sendFile(path.join(legacyFrontendDist, 'index.html'));
+  }
+  next();
+});
 
 // Global Error Handler
 app.use((err, req, res, next) => {

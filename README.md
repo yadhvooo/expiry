@@ -7,21 +7,24 @@ A production-quality full-stack marketplace web application connecting food prov
 ## 🌟 Core Highlights
 
 - **Strict Categorical Boundaries**: Per requirements, **NO fruits or vegetables** are included anywhere in categories, sample data, UI, filters, or business logic. Focused exclusively on packaged groceries, dairy, bakery, cakes/pastries, ready-to-eat meals, snacks, beverages, desserts, and frozen foods.
-- **Three Dedicated Portals**:
-  1. **Customer App**: Geolocation discovery, category tabs, dynamic urgency badges (`Ending Today 🔥`, `Best Before Tomorrow ⚡`), multi-provider cart separation protection, simulated checkout with Razorpay/UPI architecture, order history, and live QR code / 4-digit pickup code display.
-  2. **Provider Dashboard**: Real-time rescue sales (₹), products rescued count, active listings, shelf-life auto-discounting calculator, order status workflow (`Accept` -> `Ready for Pickup`), and a **Counter Pickup Verification System** with double-collection prevention.
-  3. **Admin Panel**: Provider onboarding & FSSAI license approval (`Pending` -> `Approved`/`Rejected`/`Suspended`), product moderation, order refund supervision, and marketplace analytics (GTV, platform fee revenue, food volume saved).
-- **1-Click Demo Role Switcher**: A sticky banner at the top of the app allows evaluators to switch seamlessly between **Customer** (Rahul Verma), **Provider** (The Daily Crumb Bakery), and **Admin** (Marketplace Ops) without manual credential entry.
+- **Three Dedicated Standalone Applications**:
+  1. **Customer App (`customer-app`)** - `http://localhost:5173`: Geolocation discovery, category tabs, dynamic urgency badges (`Ending Today 🔥`, `Best Before Tomorrow ⚡`), multi-provider cart separation protection, checkout simulator with Razorpay/UPI architecture, order history, and live QR code / 4-digit pickup code display.
+  2. **Store Manager Portal (`store-app`)** - `http://localhost:5174`: Real-time rescue sales (₹), products rescued count, active listings, shelf-life auto-discounting calculator, order status workflow (`Accept` -> `Ready for Pickup`), and a **Counter Pickup Verification System** with double-collection prevention.
+  3. **Admin Console (`admin-app`)** - `http://localhost:5175`: High-security Ops console for Provider onboarding & FSSAI license approval (`Pending` -> `Approved`/`Rejected`/`Suspended`), catalog moderation, order refund supervision, and marketplace analytics (GTV, platform fee revenue, food volume saved).
+- **Strict Role Isolation**: Zero cross-role code or navigation pollution. Each app has its own dedicated login and 1-click Demo Account filler for effortless testing.
 
 ---
 
 ## 🏗️ Architecture & Tech Stack
 
-- **Backend**: Node.js, Express.js (ES Modules)
+- **Backend (`backend/`)**: Node.js, Express.js (ES Modules), Port 5000
 - **Database**:
   - Full PostgreSQL DDL (`backend/src/database/schema.sql`) with 17 normalized tables and optimized indexes.
   - Zero-config dual engine: automatically connects to PostgreSQL when `DATABASE_URL` is configured in `.env`, and defaults to SQLite for instant local execution.
-- **Frontend**: React 18, Vite, Tailwind CSS, Lucide React icons, QRCode SVG generator.
+- **Frontend Applications**:
+  - **`customer-app`**: React 18, Vite, Tailwind CSS, Lucide React, Leaflet Maps, QRCode generator (Port 5173).
+  - **`store-app`**: React 18, Vite, Tailwind CSS, Lucide React, QRCode generator (Port 5174).
+  - **`admin-app`**: React 18, Vite, Tailwind CSS, Lucide React (Port 5175).
 - **Security**: JWT authentication, bcrypt password hashing, role authorization middleware, server-side price recalculation (prices sent by clients are never trusted), and transaction-level expiry validation.
 
 ---
@@ -67,16 +70,9 @@ Products are automatically classified by remaining shelf-life:
 - Node.js (v18 or higher) & npm
 
 ### 1. Installation
-Clone or navigate to the project directory:
+Install dependencies for all projects:
 ```bash
-# Install backend dependencies
-cd backend
-npm install
-
-# Install frontend dependencies
-cd ../frontend
-npm install
-cd ..
+npm run install:all
 ```
 
 ### 2. Seed Database
@@ -91,29 +87,41 @@ Execute the 20-point automated integration test suite:
 npm test
 ```
 
-### 4. Build and Start Application
-```bash
-# Build frontend
-npm run build
+### 4. Run Applications
 
-# Start the full-stack server
-npm start
+Start the shared backend API server:
+```bash
+npm run dev:backend
+# API running at http://localhost:5000
 ```
 
-Access the application in your browser:
-👉 **http://localhost:5000**
+In separate terminals, start whichever frontend application you wish to use:
+
+```bash
+# 1. Customer App (Shoppers)
+npm run dev:customer
+# Accessible at: http://localhost:5173
+
+# 2. Store Manager Portal (Merchants)
+npm run dev:store
+# Accessible at: http://localhost:5174
+
+# 3. Platform Admin Console (Operations)
+npm run dev:admin
+# Accessible at: http://localhost:5175
+```
 
 ---
 
 ## 🔑 Demo Accounts
 
-Evaluators can click any of the 1-click switcher buttons at the top of the interface, or log in manually with:
+Each app includes a 1-click **Quick Testing** button on its login screen, or you can log in manually:
 
-| Role | Email | Password | Details |
-| :--- | :--- | :--- | :--- |
-| **Customer** | `customer@example.com` | `password123` | Rahul Verma (Indiranagar, Bangalore) |
-| **Provider** | `provider@example.com` | `password123` | The Daily Crumb Bakery (Koramangala) |
-| **Admin** | `admin@example.com` | `admin123` | Marketplace Ops Admin |
+| Role | Application | URL | Email | Password | Details |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Customer** | `customer-app` | `http://localhost:5173` | `customer@example.com` | `password123` | Rahul Verma (Shopper) |
+| **Store Manager** | `store-app` | `http://localhost:5174` | `provider@example.com` | `password123` | The Daily Crumb Bakery |
+| **Admin** | `admin-app` | `http://localhost:5175` | `admin@example.com` | `admin123` | Marketplace Ops Superadmin |
 
 ---
 

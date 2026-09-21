@@ -6,12 +6,16 @@
     "start": "node backend/src/server.js",
     "seed": "node backend/src/database/seed.js",
     "test": "node backend/test/api.test.js",
-    "build": "cd frontend && npm install && npm run build",
-    "render-build": "cd backend && npm install && cd ../frontend && npm install --include=dev && npm run build && cd ..",
+    "install:all": "cd backend && npm install && cd ../customer-app && npm install && cd ../store-app && npm install && cd ../admin-app && npm install && cd ..",
+    "render-build": "cd backend && npm install && cd ../customer-app && npm install && npm run build && cd ../store-app && npm install && npm run build && cd ../admin-app && npm install && npm run build && cd ..",
+    "build": "npm run render-build",
     "dev:backend": "cd backend && npm run dev",
-
-    "dev:frontend": "cd frontend && npm run dev"
+    "dev:customer": "cd customer-app && npm run dev",
+    "dev:store": "cd store-app && npm run dev",
+    "dev:admin": "cd admin-app && npm run dev",
+    "build:customer": "cd customer-app && npm run build",
+    "build:store": "cd store-app && npm run build",
+    "build:admin": "cd admin-app && npm run build",
+    "build:all": "npm run build:customer && npm run build:store && npm run build:admin"
   }
 }
-
-
