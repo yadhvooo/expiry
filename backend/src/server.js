@@ -107,6 +107,14 @@ if (fs.existsSync(customerDist)) {
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
 
+  // Ensure trailing slash so relative assets (./assets/...) resolve to the correct app path
+  if (req.path === '/store') {
+    return res.redirect(301, '/store/');
+  }
+  if (req.path === '/admin') {
+    return res.redirect(301, '/admin/');
+  }
+
   if (req.path.startsWith('/store') && fs.existsSync(storeDist)) {
     return res.sendFile(path.join(storeDist, 'index.html'));
   }

@@ -1,3 +1,5 @@
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 import db from '../config/db.js';
 import { createNotification } from '../services/notificationService.js';
 
@@ -250,6 +252,77 @@ export async function refundOrder(req, res) {
   }
 }
 
+/**
+ * Add / Create a new Admin user
+ */
+export async function createAdminUser(req, res) {
+  try {
+    const { email, password, fullName, phone, department } = req.body;
+    if (!email || !password || !fullName) {
+      return res.status(400).json({ error: 'Email, password, and fullName are required.' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const existing = await db.query('SELECT id, role FROM users WHERE email = $1', [cleanEmail]);
+
+    if (existing.length > 0) {
+      const user = existing[0];
+      if (user.role === 'admin') {
+        return res.status(400).json({ error: `User with email '${cleanEmail}' is already an admin.` });
+      }
+
+      // Promote existing user
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(password, salt);
+
+      await db.query(
+        `UPDATE users 
+         SET role = 'admin', password_hash = $1, full_name = $2, status = 'active', updated_at = CURRENT_TIMESTAMP 
+         WHERE id = $3`,
+        [hash, fullName, user.id]
+      );
+
+      const adminUserCheck = await db.query('SELECT id FROM admin_users WHERE user_id = $1', [user.id]);
+      if (adminUserCheck.length === 0) {
+        await db.query(
+          `INSERT INTO admin_users (id, user_id, department, access_level)
+           VALUES ($1, $2, $3, 'SUPER_ADMIN')`,
+          [uuidv4(), user.id, department || 'Operations & Trust']
+        );
+      }
+
+      return res.json({
+        message: `Existing user '${cleanEmail}' has been promoted to Admin successfully.`,
+        admin: { id: user.id, email: cleanEmail, full_name: fullName, role: 'admin' }
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+    const userId = uuidv4();
+
+    await db.query(
+      `INSERT INTO users (id, email, password_hash, role, full_name, phone, status)
+       VALUES ($1, $2, $3, 'admin', $4, $5, 'active')`,
+      [userId, cleanEmail, passwordHash, fullName, phone || '9880011223']
+    );
+
+    await db.query(
+      `INSERT INTO admin_users (id, user_id, department, access_level)
+       VALUES ($1, $2, $3, 'SUPER_ADMIN')`,
+      [uuidv4(), userId, department || 'Operations & Trust']
+    );
+
+    return res.status(201).json({
+      message: 'New admin account created successfully.',
+      admin: { id: userId, email: cleanEmail, full_name: fullName, role: 'admin' }
+    });
+  } catch (error) {
+    console.error('[Admin] CreateAdminUser error:', error);
+    return res.status(500).json({ error: 'Failed to create admin user.' });
+  }
+}
+
 export default {
   getAdminAnalytics,
   getAdminProviders,
@@ -259,5 +332,6 @@ export default {
   getAdminProducts,
   toggleProductStatus,
   getAdminOrders,
-  refundOrder
+  refundOrder,
+  createAdminUser
 };

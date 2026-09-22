@@ -8,7 +8,8 @@ import {
   getAdminProducts,
   toggleProductStatus,
   getAdminOrders,
-  refundOrder
+  refundOrder,
+  createAdminUser
 } from '../controllers/adminController.js';
 import { verifyToken, requireRole } from '../middleware/auth.js';
 
@@ -26,6 +27,7 @@ router.put('/providers/:id/approve', (req, res, next) => {
 });
 router.get('/users', getAdminUsers);
 router.put('/users/:id/status', updateUserStatus);
+router.post('/users/admin', createAdminUser);
 router.get('/products', getAdminProducts);
 router.put('/products/:id/toggle', toggleProductStatus);
 router.get('/orders', getAdminOrders);

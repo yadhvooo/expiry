@@ -5,6 +5,9 @@
   "scripts": {
     "start": "node backend/src/server.js",
     "seed": "node backend/src/database/seed.js",
+    "create-admin": "node backend/src/scripts/createAdmin.js",
+    "export:mysql": "node backend/src/scripts/exportToMysql.js",
+    "sql": "node backend/src/scripts/sql.js",
     "test": "node backend/test/api.test.js",
     "install:all": "cd backend && npm install && cd ../customer-app && npm install && cd ../store-app && npm install && cd ../admin-app && npm install && cd ..",
     "render-build": "cd backend && npm install && cd ../customer-app && npm install --include=dev && npm run build && cd ../store-app && npm install --include=dev && npm run build && cd ../admin-app && npm install --include=dev && npm run build && cd ..",
