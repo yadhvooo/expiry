@@ -159,9 +159,9 @@ async function startServer() {
 
     // Auto-ensure owner admin exists in database on startup
     try {
-      const ownerEmail = (process.env.ADMIN_EMAIL || 'yadhukrishna10@gmail.com').toLowerCase().trim();
-      const ownerPass = process.env.ADMIN_PASSWORD || 'kvcvkp3';
-      const ownerName = process.env.ADMIN_NAME || 'yadhvooo';
+      const ownerEmail = (process.env.ADMIN_EMAIL || 'yadhukrishnakp10@gmail.com').toLowerCase().trim();
+      const ownerPass = process.env.ADMIN_PASSWORD || 'yadhvooo';
+      const ownerName = process.env.ADMIN_NAME || 'yadhukrishnan kp';
 
       const existingOwner = await db.query('SELECT id, role FROM users WHERE email = $1', [ownerEmail]);
       const salt = await bcrypt.genSalt(10);
@@ -178,12 +178,12 @@ async function startServer() {
           [uuidv4(), userId]
         );
         console.log(`[Server] Owner admin verified & created: ${ownerEmail}`);
-      } else if (existingOwner[0].role !== 'admin') {
+      } else {
         await db.query(
-          "UPDATE users SET role = 'admin', password_hash = $1, status = 'active' WHERE id = $2",
-          [passwordHash, existingOwner[0].id]
+          "UPDATE users SET role = 'admin', password_hash = $1, status = 'active', full_name = $2 WHERE id = $3",
+          [passwordHash, ownerName, existingOwner[0].id]
         );
-        console.log(`[Server] Promoted existing account to admin: ${ownerEmail}`);
+        console.log(`[Server] Owner admin updated with active credentials: ${ownerEmail}`);
       }
     } catch (e) {
       console.warn('[Server] Auto-admin verification skipped:', e.message);
