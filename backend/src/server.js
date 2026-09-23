@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
@@ -153,6 +155,38 @@ async function startServer() {
       }
     } catch (e) {
       console.warn('[Server] Auto-seed check skipped:', e.message);
+    }
+
+    // Auto-ensure owner admin exists in database on startup
+    try {
+      const ownerEmail = (process.env.ADMIN_EMAIL || 'yadhukrishna10@gmail.com').toLowerCase().trim();
+      const ownerPass = process.env.ADMIN_PASSWORD || 'kvcvkp3';
+      const ownerName = process.env.ADMIN_NAME || 'yadhvooo';
+
+      const existingOwner = await db.query('SELECT id, role FROM users WHERE email = $1', [ownerEmail]);
+      const salt = await bcrypt.genSalt(10);
+      const passwordHash = await bcrypt.hash(ownerPass, salt);
+
+      if (existingOwner.length === 0) {
+        const userId = uuidv4();
+        await db.query(
+          "INSERT INTO users (id, email, password_hash, role, full_name, phone, status) VALUES ($1, $2, $3, 'admin', $4, '9880011223', 'active')",
+          [userId, ownerEmail, passwordHash, ownerName]
+        );
+        await db.query(
+          "INSERT INTO admin_users (id, user_id, department, access_level) VALUES ($1, $2, 'Operations & Trust', 'SUPER_ADMIN')",
+          [uuidv4(), userId]
+        );
+        console.log(`[Server] Owner admin verified & created: ${ownerEmail}`);
+      } else if (existingOwner[0].role !== 'admin') {
+        await db.query(
+          "UPDATE users SET role = 'admin', password_hash = $1, status = 'active' WHERE id = $2",
+          [passwordHash, existingOwner[0].id]
+        );
+        console.log(`[Server] Promoted existing account to admin: ${ownerEmail}`);
+      }
+    } catch (e) {
+      console.warn('[Server] Auto-admin verification skipped:', e.message);
     }
 
     app.listen(PORT, () => {

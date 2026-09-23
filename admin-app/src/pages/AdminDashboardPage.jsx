@@ -13,7 +13,10 @@ import {
   XCircle,
   AlertTriangle,
   RefreshCw,
-  Search
+  Search,
+  UserPlus,
+  X,
+  Lock
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -25,6 +28,12 @@ export default function AdminDashboardPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
+
+  // New Admin Modal State
+  const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+  const [newAdmin, setNewAdmin] = useState({ fullName: '', email: '', password: '', department: 'Marketplace Operations' });
+  const [isSubmittingAdmin, setIsSubmittingAdmin] = useState(false);
+  const [adminModalError, setAdminModalError] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -97,6 +106,23 @@ export default function AdminDashboardPage() {
       loadData();
     } catch (err) {
       alert('Failed to refund order');
+    }
+  }
+
+  async function handleCreateAdmin(e) {
+    e.preventDefault();
+    setIsSubmittingAdmin(true);
+    setAdminModalError(null);
+    try {
+      await api.createAdminUser(newAdmin);
+      setMessage(`Admin account '${newAdmin.email}' created successfully!`);
+      setShowAddAdminModal(false);
+      setNewAdmin({ fullName: '', email: '', password: '', department: 'Marketplace Operations' });
+      loadData();
+    } catch (err) {
+      setAdminModalError(err.message || 'Failed to create admin user');
+    } finally {
+      setIsSubmittingAdmin(false);
     }
   }
 
@@ -412,8 +438,18 @@ export default function AdminDashboardPage() {
       {/* TAB 5: USER DIRECTORY */}
       {activeTab === 'users' && (
         <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-stone-100">
-            <h3 className="font-bold text-stone-900 text-sm">Platform Users (Customers, Providers, Admins)</h3>
+          <div className="p-4 border-b border-stone-100 flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-stone-900 text-sm">Platform Users (Customers, Providers, Admins)</h3>
+              <p className="text-[11px] text-stone-400">Manage user access and create internal operations administrators</p>
+            </div>
+            <button
+              onClick={() => setShowAddAdminModal(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-purple-600/20 transition-colors"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Add New Admin</span>
+            </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-stone-600">
@@ -455,6 +491,104 @@ export default function AdminDashboardPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD NEW ADMIN USER */}
+      {showAddAdminModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-stone-900 border border-stone-800 rounded-3xl max-w-md w-full p-6 text-stone-100 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-stone-800 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Create Administrator</h3>
+                  <p className="text-[11px] text-stone-400">Grant ops governance access</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAddAdminModal(false)}
+                className="p-1.5 rounded-full text-stone-400 hover:text-white hover:bg-stone-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {adminModalError && (
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                <span>{adminModalError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateAdmin} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-stone-300 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Yadhukrishnan"
+                  value={newAdmin.fullName}
+                  onChange={(e) => setNewAdmin({ ...newAdmin, fullName: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-stone-800 border border-stone-700 text-white outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-stone-300 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. yadhukrishna10@gmail.com"
+                  value={newAdmin.email}
+                  onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-stone-800 border border-stone-700 text-white outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-stone-300 mb-1">Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={newAdmin.password}
+                  onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-stone-800 border border-stone-700 text-white outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-stone-300 mb-1">Department</label>
+                <input
+                  type="text"
+                  placeholder="Operations & Trust"
+                  value={newAdmin.department}
+                  onChange={(e) => setNewAdmin({ ...newAdmin, department: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-stone-800 border border-stone-700 text-white outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowAddAdminModal(false)}
+                  className="px-4 py-2 rounded-xl text-stone-400 hover:text-white font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingAdmin}
+                  className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md shadow-purple-600/30 flex items-center gap-1.5"
+                >
+                  {isSubmittingAdmin ? 'Creating...' : 'Create Admin'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

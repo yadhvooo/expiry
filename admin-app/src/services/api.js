@@ -76,6 +76,7 @@ export const api = {
   updateProviderStatus: (id, status) => request(`/admin/providers/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
   getAdminUsers: () => request('/admin/users'),
   updateUserStatus: (id, status) => request(`/admin/users/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  createAdminUser: (data) => request('/admin/users/admin', { method: 'POST', body: JSON.stringify(data) }),
   getAdminProducts: () => request('/admin/products'),
   toggleProductStatus: (id, isActive) => request(`/admin/products/${id}/toggle`, { method: 'PUT', body: JSON.stringify({ isActive }) }),
   getAdminOrders: () => request('/admin/orders'),
